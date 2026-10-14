@@ -6,7 +6,7 @@ type Post = (message: SandboxToParent) => void;
 
 /** Browser noise that isn't a bug in the user's component. */
 export function isBenignRuntimeError(message: string): boolean {
-  return /ResizeObserver loop|undelivered notifications|Script error\.?$/i.test(message);
+  return /ResizeObserver loop|undelivered notifications|Script error\.?$|Failed to connect to MetaMask/i.test(message);
 }
 
 function toSandboxError(error: unknown, phase: SandboxError["phase"]): SandboxError {

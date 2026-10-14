@@ -142,10 +142,11 @@ describe("sandbox message filtering", () => {
     expect(isSandboxEvent({ origin: "https://evil.example", source, data: { type: "ready" } } as MessageEvent, source)).toBe(false);
   });
 
-  it("ignores ResizeObserver and script noise", async () => {
+  it("ignores ResizeObserver, script, and wallet-extension noise", async () => {
     const { isBenignRuntimeError } = await import("@/sandbox/preview");
     expect(isBenignRuntimeError("ResizeObserver loop completed with undelivered notifications.")).toBe(true);
     expect(isBenignRuntimeError("Script error.")).toBe(true);
+    expect(isBenignRuntimeError("Failed to connect to MetaMask")).toBe(true);
     expect(isBenignRuntimeError("Cannot read properties of null")).toBe(false);
   });
 });
