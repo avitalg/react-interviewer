@@ -12,7 +12,13 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps<"/exercise/[id]">): Promise<Metadata> {
   const { id } = await params;
   const exercise = getExercise(id);
-  return { title: exercise ? `${exercise.title} · React Interviewer` : "Exercise not found" };
+  if (!exercise) return { title: "Exercise not found" };
+  const description = exercise.description.trim().split(/\n\s*\n/)[0]?.replace(/[`*]/g, "") ?? exercise.title;
+  return {
+    title: exercise.title,
+    description,
+    alternates: { canonical: `/exercise/${exercise.id}` },
+  };
 }
 
 async function Exercise({ params }: { params: PageProps<"/exercise/[id]">["params"] }) {

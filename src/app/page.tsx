@@ -1,8 +1,17 @@
-import { getExerciseSummaries, topics } from "@/exercises";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { getArticles } from "@/blog";
+import { ArticleCard } from "@/components/blog/ArticleCard";
 import { OverallProgress, TopicExercises } from "@/components/home/TopicExercises";
+import { getExerciseSummaries, topics } from "@/exercises";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default function Home() {
   const exercises = getExerciseSummaries();
+  const articles = getArticles().slice(0, 3);
 
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
@@ -51,6 +60,31 @@ export default function Home() {
           </section>
         ))}
       </div>
+
+      <section className="mt-12 space-y-4 border-t border-border pt-8">
+        <div className="flex items-end justify-between gap-4">
+          <div className="space-y-1">
+            <h2 className="text-xl font-semibold tracking-tight">From the blog</h2>
+            <p className="text-sm text-muted">Interview guides that link back to the exercises above.</p>
+          </div>
+          <Link href="/blog" className="shrink-0 text-sm text-accent hover:underline">
+            All articles
+          </Link>
+        </div>
+        <ul className="grid gap-4 md:grid-cols-3">
+          {articles.map((article) => (
+            <li key={article.slug}>
+              <ArticleCard
+                href={`/blog/${article.slug}`}
+                title={article.title}
+                description={article.description}
+                date={article.date}
+                tags={article.tags}
+              />
+            </li>
+          ))}
+        </ul>
+      </section>
     </main>
   );
 }
