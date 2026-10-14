@@ -9,6 +9,7 @@ import { post as fetching } from "./react-data-fetching-interview";
 import { post as prep } from "./react-coding-interview-prep";
 import { post as aiEra } from "./react-interview-ai-era";
 import { post as top5 } from "./top-5-react-interview";
+import { post as tenConcepts } from "./10-react-concepts";
 import { post as effects } from "./useeffect-interview-questions";
 import { post as state } from "./usestate-vs-usereducer-vs-useref";
 
@@ -16,6 +17,7 @@ export const articles: Article[] = [
   top5,
   aiEra,
   questions,
+  tenConcepts,
   effects,
   state,
   keys,
