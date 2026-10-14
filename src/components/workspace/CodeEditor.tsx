@@ -6,7 +6,7 @@ import { indentUnit } from "@codemirror/language";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView, keymap } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
-import { useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { useTheme } from "@/lib/theme";
 
 const lightTheme = EditorView.theme({
@@ -36,8 +36,6 @@ export function CodeEditor({
   ariaLabel?: string;
 }) {
   const theme = useTheme();
-  const onSaveRef = useRef(onSave);
-  onSaveRef.current = onSave;
   const extensions = useMemo(
     () => [
       javascript({ jsx: true }),
@@ -49,7 +47,7 @@ export function CodeEditor({
           preventDefault: true,
           stopPropagation: true,
           run: () => {
-            onSaveRef.current?.();
+            onSave?.();
             return true;
           },
         },
@@ -58,7 +56,7 @@ export function CodeEditor({
       spacingTheme,
       ...(theme === "light" ? [lightTheme] : []),
     ],
-    [theme, ariaLabel],
+    [theme, ariaLabel, onSave],
   );
 
   return (
