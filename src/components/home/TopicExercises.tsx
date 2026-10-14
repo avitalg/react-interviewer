@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ExerciseSummary } from "@/exercises/types";
+import { trackEvent } from "@/lib/analytics";
 import { useStatuses } from "@/lib/progress";
 import { DifficultyBadge, StatusPill } from "@/components/ui";
 
@@ -39,6 +40,13 @@ export function TopicExercises({ topicTitle, exercises }: { topicTitle: string; 
             <Link
               href={`/exercise/${exercise.id}`}
               className="group flex items-center gap-3 px-4 py-2.5 transition hover:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none"
+              onClick={() =>
+                trackEvent("exercise_select", {
+                  exercise_id: exercise.id,
+                  topic: exercise.topic,
+                  difficulty: exercise.difficulty,
+                })
+              }
             >
               <span className="min-w-0 flex-1 truncate text-sm text-fg group-hover:text-accent">{exercise.title}</span>
               <DifficultyBadge difficulty={exercise.difficulty} />

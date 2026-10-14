@@ -1,5 +1,6 @@
 "use client";
 
+import { trackEvent } from "@/lib/analytics";
 import { setTheme, useTheme } from "@/lib/theme";
 
 export function ThemeToggle() {
@@ -9,7 +10,10 @@ export function ThemeToggle() {
   return (
     <button
       type="button"
-      onClick={() => setTheme(next)}
+      onClick={() => {
+        setTheme(next);
+        trackEvent("theme_change", { theme: next });
+      }}
       className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-surface px-2.5 text-xs text-muted transition hover:text-fg"
       aria-label={`Switch to ${next} theme`}
       title={`Switch to ${next} theme`}

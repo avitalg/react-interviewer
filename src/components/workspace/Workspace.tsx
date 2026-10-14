@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import type { ClientExercise, ExerciseSummary } from "@/exercises/types";
+import { trackEvent } from "@/lib/analytics";
 import { verdictLabel } from "@/lib/checks/verdict";
 import { toEditorChanges } from "@/lib/fix";
 import { useAiEnabled, useMediaQuery } from "@/lib/hooks";
@@ -50,6 +51,7 @@ export function Workspace({
     },
     [exercise.id, exercise.starterCode],
   );
+  const handleEditorSave = useCallback(() => persist(true), [persist]);
   useEffect(() => {
     latestCode.current = code;
     const id = window.setTimeout(() => persist(), 500);
@@ -78,6 +80,13 @@ export function Workspace({
     const id = window.setTimeout(() => setJustSaved(false), 1200);
     return () => window.clearTimeout(id);
   }, [justSaved]);
+  useEffect(() => {
+    trackEvent("exercise_open", {
+      exercise_id: exercise.id,
+      topic: exercise.topic,
+      difficulty: exercise.difficulty,
+    });
+  }, [exercise.id, exercise.topic, exercise.difficulty]);
 
   /** Replaces editor content in one transaction, touching only changed lines, so one undo reverts it. */
   const replaceCode = useCallback((next: string) => {
@@ -93,6 +102,7 @@ export function Workspace({
 
   const onSubmit = () => {
     setTab("feedback");
+    trackEvent("submit", { exercise_id: exercise.id });
     void review.submit(code);
   };
 
@@ -132,7 +142,10 @@ export function Workspace({
           Reset to starter code
         </Button>
         <Button
-          onClick={() => setShowSolution(true)}
+          onClick={() => {
+            trackEvent("show_solution", { exercise_id: exercise.id });
+            setShowSolution(true);
+          }}
           disabled={!canShowSolution}
           title={canShowSolution ? undefined : "Submit at least once to unlock the solution"}
         >
@@ -166,7 +179,7 @@ export function Workspace({
         <CodeEditor
           value={code}
           onChange={setCode}
-          onSave={() => persist(true)}
+          onSave={handleEditorSave}
           onReady={(view) => {
             viewRef.current = view;
           }}
@@ -218,6 +231,7 @@ export function Workspace({
             <p className="p-4 text-sm text-rose-500">Couldn&apos;t run the checks: {review.error}</p>
           ) : (
             <FeedbackPanel
+              exerciseId={exercise.id}
               report={review.report}
               checking={review.checking}
               currentCode={code}
@@ -258,6 +272,7 @@ export function Workspace({
           onCancel={() => setConfirmReset(false)}
           onConfirm={() => {
             setConfirmReset(false);
+            trackEvent("reset_code", { exercise_id: exercise.id });
             replaceCode(exercise.starterCode);
           }}
         />

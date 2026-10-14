@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { trackEvent } from "@/lib/analytics";
 import { verdictLabel, type Verdict } from "@/lib/checks/verdict";
 import type { ExerciseSummary } from "@/exercises/types";
 import type { ReviewReport } from "@/lib/review/types";
@@ -38,12 +39,14 @@ function Section({ title, children, count }: { title: string; children: ReactNod
 }
 
 export function FeedbackPanel({
+  exerciseId,
   report,
   checking,
   currentCode,
   onApplyFix,
   nextExercise,
 }: {
+  exerciseId: string;
   report: ReviewReport | null;
   checking: boolean;
   currentCode: string;
@@ -241,7 +244,10 @@ export function FeedbackPanel({
             <div className="flex flex-wrap items-center gap-3">
               <Button
                 variant="primary"
-                onClick={() => onApplyFix(report.fix!.code)}
+                onClick={() => {
+                  trackEvent("apply_fix", { exercise_id: exerciseId, source: report.fix!.source });
+                  onApplyFix(report.fix!.code);
+                }}
                 disabled={stale || Boolean(fixApplied)}
                 title={stale ? "Your code changed since this review; submit again first." : undefined}
               >

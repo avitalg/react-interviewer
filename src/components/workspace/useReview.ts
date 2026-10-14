@@ -2,8 +2,9 @@
 
 import { useCallback, useRef, useState } from "react";
 import type { ClientExercise } from "@/exercises/types";
+import { trackEvent } from "@/lib/analytics";
 import { loadBabel } from "@/lib/compile";
-import { recordSubmission } from "@/lib/progress";
+import { loadProgress, recordSubmission } from "@/lib/progress";
 import { buildReport, evaluateCode } from "@/lib/review/evaluate";
 import { mergeAiReview } from "@/lib/review/merge";
 import type { ReviewReport, ReviewRequest, ReviewResponse } from "@/lib/review/types";
@@ -44,12 +45,23 @@ export function useReview(exercise: ClientExercise, aiEnabled: boolean) {
         if (isCurrent()) {
           setChecking(false);
           setError(err instanceof Error ? err.message : String(err));
+          trackEvent("submission_error", { exercise_id: exercise.id });
         }
         return;
       }
       if (!isCurrent()) return;
 
+      const previous = loadProgress(exercise.id);
       recordSubmission(exercise.id, evaluation.verdict);
+      trackEvent("submission_result", {
+        exercise_id: exercise.id,
+        topic: exercise.topic,
+        verdict: evaluation.verdict,
+        passed: evaluation.checks.filter((check) => check.passed).length,
+        total: evaluation.checks.length,
+        submissions: previous.submissions + 1,
+        first_solve: !previous.solved && evaluation.verdict === "pass",
+      });
       let current = buildReport(code, evaluation, aiEnabled);
       setReport(current);
       setChecking(false);
