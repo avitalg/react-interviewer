@@ -7,6 +7,7 @@ export const jsxExercises: Exercise[] = [
     topic: "jsx",
     title: "Profile card",
     difficulty: "Easy",
+    solutionExplanation: `Extract a \`ProfileCard\` that takes the \`user\` as a prop, then render it from \`App\`. JSX uses \`className\` instead of \`class\`, and the image's \`alt\` should be the person's name so the card is accessible.`,
     description: `Build a small **ProfileCard** component that renders a user's details, and use it from \`App\`.
 
 The \`user\` object is already defined at the top of the file.`,
@@ -113,6 +114,7 @@ export default function App() {
     topic: "jsx",
     title: "Split a page into components",
     difficulty: "Easy",
+    solutionExplanation: `Move each region into its own component — \`Header\`, \`Article\`, and \`Footer\` — and let \`App\` only compose them. The markup on screen stays the same; the pieces just get smaller and reusable.`,
     description: `\`App\` renders a whole blog page in one big block of JSX. Refactor it into three small components without changing what's on the screen.`,
     requirements: [
       { id: "define", text: "Create `Header`, `Article` and `Footer` components." },
@@ -208,6 +210,7 @@ export default function App() {
     topic: "jsx",
     title: "Star rating display",
     difficulty: "Medium",
+    solutionExplanation: `Map over \`max\` (defaulting to 5 with a default parameter) and pick \`★\` or \`☆\` from the index. An \`aria-label\` like \`Rating: 3 out of 5\` describes the row for screen readers, and \`App\` renders two ratings with different props.`,
     description: `Create a read-only **StarRating** component. It renders a row of stars: filled stars (\`★\`) for the rating and empty stars (\`☆\`) for the rest.
 
 Think about how to render a list of N elements from a number.`,

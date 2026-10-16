@@ -7,6 +7,7 @@ export const listsExercises: Exercise[] = [
     topic: "lists",
     title: "Render a list of users",
     difficulty: "Easy",
+    solutionExplanation: `Map the array to \`<li>\` elements and set \`key={user.id}\` — never the index. The heading count is \`users.length\`, derived during render rather than stored in extra state.`,
     description: `Render an array of users as a list. Each list item needs a **key** so React can track items between renders.`,
     requirements: [
       { id: "list", text: "Render each user as an `<li>` inside a `<ul>`, showing their name and email." },
@@ -91,6 +92,8 @@ export default function App() {
     topic: "lists",
     title: "Filterable list",
     difficulty: "Medium",
+    solutionExplanation: `Keep only the search query in state and derive the visible list during render with \`filter\`. That way the source data never goes out of sync, and an empty result set can show \`No matches\` instead of a blank list.`,
+
     description: `Add a search box that filters a list of fruits as you type.
 
 The starter code keeps the filtered list in a second piece of state and recomputes it from the **previous** query, so it's always one keystroke behind. Values you can compute from existing state or props should be computed during render instead.`,
@@ -204,6 +207,8 @@ export default function App() {
     topic: "lists",
     title: "Sortable table",
     difficulty: "Hard",
+    solutionExplanation: `Sort a copy (\`[...employees].sort(...)\`) so the original array stays intact. Store the active column and direction; clicking the same header toggles direction, clicking another column starts ascending.`,
+
     description: `Make a table sortable by clicking its column headers.
 
 The starter code sorts with \`employees.sort()\`, which sorts the shared array **in place**. Sorting should produce a new array and leave the original data alone.`,

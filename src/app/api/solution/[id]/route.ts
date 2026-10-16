@@ -6,5 +6,8 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/solu
   if (!exercise) {
     return Response.json({ error: "Exercise not found" }, { status: 404 });
   }
-  return Response.json({ solution: exercise.referenceSolution });
+  return Response.json({
+    solution: exercise.referenceSolution,
+    explanation: exercise.solutionExplanation,
+  });
 }

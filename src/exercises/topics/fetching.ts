@@ -7,6 +7,8 @@ export const fetchingExercises: Exercise[] = [
     topic: "fetching",
     title: "Fetch with loading and error states",
     difficulty: "Easy",
+    solutionExplanation: `Fetch once on mount in an effect. Track \`loading\`, \`error\`, and the list as three pieces of state, and check \`res.ok\` because \`fetch\` doesn't throw on 404/500. Retry clears the error and runs the request again.`,
+
     description: `Load a list of users from \`/api/users\` (a fake API that runs inside the preview). Real requests can be slow or fail, so handle all three states: **loading**, **error** and **success**.
 
 Note that \`fetch\` only rejects on network errors. A \`500\` response resolves normally, so check \`response.ok\`.`,
@@ -164,6 +166,8 @@ export default function App() {
     topic: "fetching",
     title: "Paginated posts",
     difficulty: "Medium",
+    solutionExplanation: `Keep \`page\` in state and fetch \`/api/posts?page=\${page}\` in an effect that depends on it. Disable Previous on page 1 and Next on the last page using \`totalPages\` from the response, and show a loading state while a page is in flight.`,
+
     description: `Show posts from \`/api/posts?page=N\`, which responds with \`{ posts: [{ id, title }], totalPages }\`.
 
 The starter code fetches only once, because its effect has an empty dependency array even though it uses \`page\`.`,
@@ -317,6 +321,8 @@ export default function App() {
     topic: "fetching",
     title: "Search with request cancellation",
     difficulty: "Hard",
+    solutionExplanation: `Fetch in an effect that depends on the query, and skip empty input. Create an \`AbortController\` and abort it in the cleanup so a slow earlier response can't overwrite newer results. Ignore \`AbortError\` in the catch so cancelled requests don't look like failures.`,
+
     description: `Search \`/api/search?q=…\` (responds with \`{ results: string[] }\`) as the user types.
 
 This fake API answers **shorter queries more slowly**, like a real search over more results. Without cancellation, the response for \`r\` can arrive after the one for \`rea\` and overwrite it: a **race condition**. Cancel stale requests with an \`AbortController\`.`,

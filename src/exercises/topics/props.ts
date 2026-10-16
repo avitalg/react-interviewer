@@ -7,6 +7,7 @@ export const propsExercises: Exercise[] = [
     topic: "props",
     title: "Button with variants",
     difficulty: "Easy",
+    solutionExplanation: `One \`Button\` takes \`children\` as the label, a \`variant\` that defaults to \`primary\`, and a forwarded \`onClick\`. Class names are \`btn btn-<variant>\`. \`App\` then uses three instances (Save, Cancel, Delete) instead of copying markup.`,
     description: `Design systems usually have one **Button** component with a few visual variants. Build one and use it three times.`,
     requirements: [
       { id: "children", text: "`Button` renders a `<button>` that uses `children` as its label." },
@@ -109,6 +110,8 @@ export default function App() {
     topic: "props",
     title: "Card with children and a footer slot",
     difficulty: "Medium",
+    solutionExplanation: `Treat \`Card\` as a shell: put \`title\` in a heading, render \`children\` in the body, and only output a \`<footer>\` when the \`footer\` prop is passed. That slot pattern lets the same Card wrap different content.`,
+
     description: `Composition beats configuration: instead of passing strings for every part of a card, let callers pass **JSX**. \`children\` is the main slot, and a \`footer\` prop is an optional second slot.`,
     requirements: [
       { id: "title", text: "`Card` renders a `<section className=\"card\">` with its `title` prop in an `<h3>`." },
@@ -210,6 +213,8 @@ export default function App() {
     topic: "props",
     title: "Compound Tabs component",
     difficulty: "Hard",
+    solutionExplanation: `\`Tabs\` owns the selected index. \`Children.map\` reads each \`Tab\`'s \`label\` and \`default\` without rendering them as-is, then you draw the tablist and only the active panel. Compound components share state through the parent, not props on every child.`,
+
     description: `Build an accessible **Tabs** component with a compound API: the caller describes tabs as \`<Tab label="…">content</Tab>\` children, and \`Tabs\` decides what to render.
 
 Hint: \`Children.toArray(children)\` gives you an array of the \`<Tab>\` elements, and each one has its \`label\` in \`.props\`.`,

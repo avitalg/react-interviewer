@@ -7,6 +7,7 @@ export const formsExercises: Exercise[] = [
     topic: "forms",
     title: "Live greeting input",
     difficulty: "Easy",
+    solutionExplanation: `Make the input controlled: \`value\` and \`onChange\` both come from one piece of state. The greeting, character count, and Clear button all derive from that string — no extra state needed.`,
     description: `Turn the input into a **controlled input**: React state is the single source of truth for its value, and the UI derives everything else from that state.`,
     requirements: [
       { id: "label", text: "The input is labelled `Name` (with a `<label>`)." },
@@ -108,6 +109,8 @@ export default function App() {
     topic: "forms",
     title: "Sign-up form with validation",
     difficulty: "Medium",
+    solutionExplanation: `Keep the fields in one state object and handle \`onSubmit\` on the form (with \`preventDefault\`) so Enter works. Validate email, password length, and match on submit, and show only the errors that apply.`,
+
     description: `Build a sign-up form that validates on submit and shows clear error messages next to the fields.`,
     requirements: [
       { id: "fields", text: "A `<form>` with inputs labelled `Email`, `Password` and `Confirm password` (password inputs use `type=\"password\"`), and a **Sign up** submit button." },
@@ -250,6 +253,8 @@ export default function App() {
     topic: "forms",
     title: "Dynamic guest list",
     difficulty: "Hard",
+    solutionExplanation: `Store rows as \`{id, name}[]\` with a stable id as the \`key\` — not the array index, or values jump when you remove a row. Add and remove immutably so the other inputs keep what the user typed.`,
+
     description: `Build a form with a **dynamic number of fields**: one text input per guest, with buttons to add and remove rows.
 
 The starter code uses array indexes as keys and mutates state, two bugs that show up as soon as rows can be removed.`,

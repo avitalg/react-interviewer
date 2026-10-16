@@ -7,6 +7,7 @@ export const hooksExercises: Exercise[] = [
     topic: "hooks",
     title: "useToggle",
     difficulty: "Easy",
+    solutionExplanation: `\`useToggle\` is \`useState\` plus a \`toggle\` wrapped in \`useCallback\` so its identity stays stable. Pass a boolean to set it explicitly; any other argument (like a click event) just flips the value. Each caller gets its own state.`,
     description: `Write a reusable \`useToggle\` hook for boolean state: open/closed, shown/hidden, on/off.
 
 The returned \`toggle\` function is often passed to child components or effects, so its identity should be **stable** across renders.`,
@@ -126,6 +127,8 @@ export default function App() {
     topic: "hooks",
     title: "useLocalStorage",
     difficulty: "Medium",
+    solutionExplanation: `Initialize state from \`JSON.parse(localStorage.getItem(...))\`, and fall back to the default if the value is missing or corrupt. Write back in an effect whenever the value changes so a reload restores it.`,
+
     description: `Write a \`useLocalStorage(key, initialValue)\` hook that works like \`useState\` but persists the value in \`localStorage\` as JSON.
 
 Read storage only once (pass a function to \`useState\` for lazy initialization), and don't crash on corrupt data.`,
@@ -250,6 +253,8 @@ export default function App() {
     topic: "hooks",
     title: "useDebounce",
     difficulty: "Hard",
+    solutionExplanation: `Keep a delayed copy of the value in state. An effect starts a timeout to update it, and the cleanup clears that timeout — so each keystroke resets the timer and only the last value after a pause is published.`,
+
     description: `Write \`useDebounce(value, delay)\`: it returns \`value\` only after it has stopped changing for \`delay\` milliseconds. It's the standard way to avoid filtering or fetching on every keystroke.
 
 Each change should cancel the pending timer and start a new one.`,

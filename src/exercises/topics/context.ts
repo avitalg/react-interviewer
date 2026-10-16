@@ -7,6 +7,8 @@ export const contextExercises: Exercise[] = [
     topic: "context",
     title: "Theme context instead of prop drilling",
     difficulty: "Easy",
+    solutionExplanation: `Create a \`ThemeContext\` and wrap the tree in a provider that holds \`theme\` and a toggle. Deep components read it with \`useContext\` instead of receiving unused props. Set \`data-theme\` on the wrapper from that value.`,
+
     description: `The starter code passes \`theme\` and \`onToggle\` through \`Page\` and \`Toolbar\`, which don't use them: they only forward them. That's **prop drilling**.
 
 Refactor it to use context so \`ThemeButton\` and \`Page\` read the theme directly.`,
@@ -132,6 +134,8 @@ export default function App() {
     topic: "context",
     title: "Auth provider and useAuth hook",
     difficulty: "Medium",
+    solutionExplanation: `\`AuthProvider\` owns \`user\`, \`login\`, and \`logout\` in context. \`useAuth\` returns that value and throws if it's missing, so callers fail loudly outside the provider. The UI switches on whether \`user\` is set.`,
+
     description: `Build an \`AuthProvider\` that holds the signed-in user, plus a \`useAuth()\` hook for reading it.
 
 A good custom context hook **fails loudly** when it's used outside its provider, instead of silently returning \`null\`.`,
@@ -328,6 +332,8 @@ export default function App() {
     topic: "context",
     title: "Shopping cart with useReducer + context",
     difficulty: "Hard",
+    solutionExplanation: `A reducer handles add (increment quantity if the item exists), remove, and clear — always returning new objects, never mutating. Context shares \`state\` and \`dispatch\`; the heading count and total are derived from the items array.`,
+
     description: `Build a shopping cart whose state lives in a **reducer** and is shared through **context**, so the product list and the cart can live in separate components.
 
 The starter reducer mutates \`state\` and returns the same array, so React never re-renders. Reducers must return **new** state.`,

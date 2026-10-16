@@ -27,6 +27,7 @@ describe("exercise data", () => {
     for (const check of exercise.checks) expect(requirementIds.has(check.requirementId), check.id).toBe(true);
     const checkIds = exercise.checks.map((c) => c.id);
     expect(new Set(checkIds).size).toBe(checkIds.length);
+    expect(exercise.solutionExplanation.trim().length).toBeGreaterThan(40);
   });
 });
 

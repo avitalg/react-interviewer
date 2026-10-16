@@ -7,6 +7,7 @@ export const conditionalExercises: Exercise[] = [
     topic: "conditional",
     title: "Logged in / logged out",
     difficulty: "Easy",
+    solutionExplanation: `A \`loggedIn\` boolean chooses which UI to render — don't show both. For the message count, use a ternary (\`count > 0 ? … : null\`) instead of \`count && …\`, which would print a stray \`0\` when the count is zero.`,
     description: `Show different UI depending on whether the user is logged in.
 
 Watch out for the classic \`&&\` trap: \`{count && <p>…</p>}\` renders a stray **0** when \`count\` is 0.`,
@@ -122,6 +123,8 @@ export default function App() {
     topic: "conditional",
     title: "Accordion (one open at a time)",
     difficulty: "Medium",
+    solutionExplanation: `Store the open section's id (or \`null\` if none). Clicking the open one closes it; opening another replaces it. \`aria-expanded\` on each button should match that state so the accordion is usable with a screen reader.`,
+
     description: `Build an FAQ accordion where **only one** item can be open at a time.
 
 In the starter code, each item keeps its own \`isOpen\` state, so several can be open at once. Lift the state up into the parent.`,
@@ -256,6 +259,8 @@ export default function App() {
     topic: "conditional",
     title: "Accessible modal",
     difficulty: "Hard",
+    solutionExplanation: `Don't render the dialog at all when it's closed. Listen for Escape in an effect and remove the listener in cleanup. Backdrop clicks close the modal; clicks inside the dialog should not.`,
+
     description: `Build a modal dialog that opens from a button and can be dismissed three ways: the **Close** button, the **Escape** key, and clicking the backdrop.
 
 Listening for Escape means adding a \`keydown\` listener on \`document\` while the modal is open, and removing it when it closes.`,

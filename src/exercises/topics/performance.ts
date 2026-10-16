@@ -7,6 +7,7 @@ export const performanceExercises: Exercise[] = [
     topic: "performance",
     title: "Skip re-rendering rows with memo",
     difficulty: "Easy",
+    solutionExplanation: `Wrap \`Row\` in \`memo\` so it skips a re-render when its props are unchanged. Incrementing a parent counter then won't log \`render Row …\` for every row — only a real prop change will.`,
     description: `Every time the counter changes, \`App\` re-renders, and so does every \`Row\`, even though their props didn't change. Open the console to see the \`render Row …\` logs.
 
 Wrap \`Row\` in \`memo\` so it only re-renders when its props change.`,
@@ -106,6 +107,8 @@ export default function App() {
     topic: "performance",
     title: "Memoize an expensive filter",
     difficulty: "Medium",
+    solutionExplanation: `Wrap the filtered list in \`useMemo\` with \`[items, query]\` as dependencies. Toggling unrelated state (like a theme) then won't rerun the slow filter, because those inputs didn't change.`,
+
     description: `\`slowFilter\` is expensive (imagine thousands of items). Right now it runs on **every** render, including when you only toggle dark mode.
 
 Use \`useMemo\` so the list is only re-filtered when the query changes.`,
@@ -212,6 +215,8 @@ export default function App() {
     topic: "performance",
     title: "Stable callbacks for memoized children",
     difficulty: "Hard",
+    solutionExplanation: `\`memo\` compares props by reference, so a new inline function on every render defeats it. Wrap the row handler in \`useCallback\` (updater form, empty deps) so memoized children see a stable \`onDelete\`.`,
+
     description: `\`TodoItem\` is already wrapped in \`memo\`, yet typing in the **Note** field re-renders every item. Why? \`App\` creates a new \`onToggle\` function on every render, so \`memo\` sees a changed prop.
 
 Make \`onToggle\` stable with \`useCallback\`. To keep it stable even when \`todos\` changes, use a **functional state update**.`,

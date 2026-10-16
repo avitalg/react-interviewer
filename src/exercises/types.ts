@@ -76,6 +76,8 @@ export interface Exercise {
   requirements: Requirement[];
   starterCode: string;
   checks: Check[];
+  /** Short walkthrough of the reference solution. Revealed only after the first submit. */
+  solutionExplanation: string;
   /** Used only for checking; revealed only after the user submits at least once. */
   referenceSolution: string;
   /** Fake backend for data-fetching exercises, used by the preview and the tests. Must be self-contained. */
@@ -87,7 +89,7 @@ export type ClientCheck =
   | (CheckBase & { kind: "runtime" } & Pick<CheckPayload, "source" | "timeoutMs">);
 
 /** What the browser receives: no reference solution, and functions serialized as source strings. */
-export interface ClientExercise extends Omit<Exercise, "checks" | "referenceSolution" | "mockApi"> {
+export interface ClientExercise extends Omit<Exercise, "checks" | "referenceSolution" | "solutionExplanation" | "mockApi"> {
   checks: ClientCheck[];
   mockApi?: string;
   topicTitle: string;

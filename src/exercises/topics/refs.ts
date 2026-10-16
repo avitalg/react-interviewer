@@ -7,6 +7,8 @@ export const refsExercises: Exercise[] = [
     topic: "refs",
     title: "Focus an input",
     difficulty: "Easy",
+    solutionExplanation: `Attach a \`useRef\` to the input and call \`ref.current.focus()\`. Do that once on mount with an effect, and again from the **Focus input** button. Don't look the element up with \`document.getElementById\`.`,
+
     description: `Focus an input from code. In React you don't look elements up with \`document.getElementById\`: you attach a **ref** and call methods on \`ref.current\`.`,
     requirements: [
       { id: "mount", text: "The input (placeholder `Type here`) is focused as soon as the component mounts." },
@@ -77,6 +79,8 @@ export default function App() {
     topic: "refs",
     title: "usePrevious hook",
     difficulty: "Medium",
+    solutionExplanation: `A ref holds the previous value because changing \`ref.current\` doesn't re-render. Return that value, then update the ref in an effect after render so the next call sees what was current this time.`,
+
     description: `Write a \`usePrevious(value)\` hook that returns the value from the **previous render**.
 
 Refs are perfect for this: changing \`ref.current\` doesn't trigger a re-render, and the value survives between renders. Update it in an effect, which runs *after* the render has used the old value.`,
@@ -165,6 +169,8 @@ export default function App() {
     topic: "refs",
     title: "Dropdown that closes on outside click",
     difficulty: "Hard",
+    solutionExplanation: `Put a ref on the dropdown root. An effect adds a document \`mousedown\` listener: if the event target isn't inside that node, close the menu. Always remove the listener in the effect cleanup.`,
+
     description: `Build a dropdown menu that closes when you click anywhere outside it.
 
 Attach a ref to the dropdown's wrapper, listen for \`mousedown\` on \`document\`, and close the menu when the event target isn't inside \`ref.current\`.`,

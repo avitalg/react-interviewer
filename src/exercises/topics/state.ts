@@ -7,6 +7,7 @@ export const stateExercises: Exercise[] = [
     topic: "state",
     title: "Counter",
     difficulty: "Easy",
+    solutionExplanation: `Keep the count in \`useState\`, not a plain variable — only a setter triggers a re-render. Use the updater form (\`c => c + 1\`) so each click is based on the latest value, and disable Decrement when the count is 0.`,
     description: `The classic warm-up. The starter code keeps the count in a plain variable, so clicking does nothing visible. Fix it with state.`,
     requirements: [
       { id: "display", text: "Show the count (starting at `0`) in an element with `data-testid=\"count\"`." },
@@ -110,6 +111,8 @@ export default function App() {
     topic: "state",
     title: "Todo list",
     difficulty: "Medium",
+    solutionExplanation: `Store todos as \`{id, text, done}[]\`. Add with spread, toggle with \`map\`, and delete with \`filter\` — never mutate the array. The remaining count is derived from the list during render, not stored separately.`,
+
     description: `Build a small todo list. The starter code has a bug that interviewers love: it **mutates state**, so React doesn't re-render. Fix it and add the missing features.`,
     requirements: [
       { id: "add", text: "Typing in the input (placeholder `Add a todo`) and clicking **Add** (or pressing Enter) adds the todo to the list, then clears the input." },
@@ -291,6 +294,8 @@ export default function App() {
     topic: "state",
     title: "Counter with undo and redo",
     difficulty: "Hard",
+    solutionExplanation: `Keep a history array and an index into it. A new edit slices off anything after the index (so redo is discarded), then undo/redo only move the index. The current count is \`history[index]\`.`,
+
     description: `Add **undo/redo** to a counter. A common approach keeps three pieces of state: the \`past\` values, the \`present\` value and the \`future\` values (or one object holding all three).`,
     requirements: [
       { id: "change", text: "**+1** and **-1** change the count (starting at `0`), shown in `data-testid=\"count\"`." },

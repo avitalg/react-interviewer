@@ -7,6 +7,7 @@ export const effectsExercises: Exercise[] = [
     topic: "effects",
     title: "Sync the document title",
     difficulty: "Easy",
+    solutionExplanation: `Keep the click count in state, then sync \`document.title\` in a \`useEffect\` whose dependency array is \`[count]\`. Without that array the effect would run after every render, including ones that didn't change the count.`,
     description: `Keep the browser tab's title in sync with a click counter. Updating \`document.title\` is a side effect, so it belongs in \`useEffect\`.
 
 The starter code works, but its effect runs after **every** render. Make it run only when it needs to.`,
@@ -87,6 +88,8 @@ export default function App() {
     topic: "effects",
     title: "Countdown timer",
     difficulty: "Medium",
+    solutionExplanation: `Put the interval in an effect that depends on whether the timer is running, and clear it in the cleanup so pausing or unmounting doesn't leave a ticker behind. Guard the tick so the count never goes below 0.`,
+
     description: `Build a 10-second countdown. The starter code starts a \`setInterval\` from the click handler and runs into the classic **stale closure** bug: the timer always sees \`seconds = 10\`, so it gets stuck on 9. It also never stops the interval.
 
 Move the timer into an effect that starts when the countdown is running and cleans up after itself.`,
@@ -230,6 +233,8 @@ export default function App() {
     topic: "effects",
     title: "Stopwatch with laps",
     difficulty: "Hard",
+    solutionExplanation: `Drive the clock from an interval in an effect that starts and stops with \`running\`, and always clear it in cleanup. Lap times are a list you prepend to; Reset stops the clock and empties both elapsed time and laps.`,
+
     description: `Build a stopwatch that shows elapsed time with one decimal (\`0.0\`, \`1.5\`, …) and can record laps.
 
 Interval timers are fine for this exercise: tick every 100ms.`,

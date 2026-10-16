@@ -15,12 +15,12 @@ import { Button, ButtonLink, DifficultyBadge, StatusPill, cx } from "@/component
 import { CodeEditor } from "./CodeEditor";
 import { FeedbackPanel } from "./FeedbackPanel";
 import { Preview, PreviewStatusBadge } from "./Preview";
-import { SolutionModal } from "./SolutionModal";
+import { SolutionPanel } from "./SolutionPanel";
 import { TaskPanel } from "./TaskPanel";
 import { useLivePreview } from "./useLivePreview";
 import { useReview } from "./useReview";
 
-type Tab = "preview" | "feedback";
+type Tab = "preview" | "feedback" | "solution";
 
 export function Workspace({
   exercise,
@@ -32,7 +32,6 @@ export function Workspace({
   const [code, setCode] = useState(() => loadCode(exercise.id) ?? exercise.starterCode);
   const [tab, setTab] = useState<Tab>("preview");
   const [confirmReset, setConfirmReset] = useState(false);
-  const [showSolution, setShowSolution] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const viewRef = useRef<EditorView | null>(null);
   const isWide = useMediaQuery("(min-width: 1024px)");
@@ -141,16 +140,6 @@ export function Workspace({
         <Button variant="ghost" onClick={() => setConfirmReset(true)} disabled={code === exercise.starterCode}>
           Reset to starter code
         </Button>
-        <Button
-          onClick={() => {
-            trackEvent("show_solution", { exercise_id: exercise.id });
-            setShowSolution(true);
-          }}
-          disabled={!canShowSolution}
-          title={canShowSolution ? undefined : "Submit at least once to unlock the solution"}
-        >
-          Show solution
-        </Button>
         <Button variant="primary" onClick={onSubmit} disabled={review.checking}>
           {review.checking ? "Checking…" : "Submit"}
         </Button>
@@ -212,6 +201,20 @@ export function Workspace({
               </span>
             )}
           </TabButton>
+          <TabButton
+            active={tab === "solution"}
+            onClick={() => {
+              if (tab !== "solution") trackEvent("show_solution", { exercise_id: exercise.id });
+              setTab("solution");
+            }}
+          >
+            Solution
+            {!canShowSolution && (
+              <span className="ml-1.5 text-[10px] text-muted" aria-label="Locked until you submit">
+                locked
+              </span>
+            )}
+          </TabButton>
         </div>
         <div className="pr-2">
           <PreviewStatusBadge status={preview.status} />
@@ -239,6 +242,15 @@ export function Workspace({
               nextExercise={nextExercise}
             />
           )}
+        </div>
+        <div className={cx("absolute inset-0", tab !== "solution" && "invisible")} role="tabpanel" aria-label="Solution">
+          <SolutionPanel
+            key={exercise.id}
+            exerciseId={exercise.id}
+            userCode={code}
+            unlocked={canShowSolution}
+            active={tab === "solution"}
+          />
         </div>
       </div>
     </div>
@@ -276,9 +288,6 @@ export function Workspace({
             replaceCode(exercise.starterCode);
           }}
         />
-      )}
-      {showSolution && (
-        <SolutionModal exerciseId={exercise.id} userCode={code} onClose={() => setShowSolution(false)} />
       )}
     </div>
   );

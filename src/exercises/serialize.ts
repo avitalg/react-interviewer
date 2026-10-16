@@ -18,10 +18,11 @@ export function functionSource(fn: Function): string {
   return source;
 }
 
-/** What the browser receives: no reference solution, and functions serialized as source strings. */
+/** What the browser receives: no reference solution or walkthrough, and functions serialized as source strings. */
 export function toClientExercise(exercise: Exercise): ClientExercise {
-  const { referenceSolution: _solution, mockApi, checks, ...rest } = exercise;
+  const { referenceSolution: _solution, solutionExplanation: _explanation, mockApi, checks, ...rest } = exercise;
   void _solution;
+  void _explanation;
   return {
     ...rest,
     topicTitle: getTopic(exercise.topic)?.title ?? exercise.topic,

@@ -89,15 +89,16 @@ User code never runs on the host page. The preview iframe is an opaque origin wi
 
 The host app is Next.js 16 / React 19. The sandbox is React 18, matching a typical interview environment.
 
-Reference solutions stay on the server. After the first submit, the workspace can fetch one from `/api/solution/[id]`.
+Reference solutions stay on the server. After the first submit, the **Solution** tab shows a short walkthrough and the reference code (`/api/solution/[id]`).
 
 ## Adding an exercise
 
 1. Add an `Exercise` to the matching file under `src/exercises/topics/` (it is already re-exported from `src/exercises/all.ts`).
 2. Give it unique `id`s for the exercise, each requirement, and each check.
 3. Point every check at a `requirementId`. Use `kind: "static"` for AST rules and `kind: "runtime"` for UI tests.
-4. Keep `run` self-contained. Use `t.render()`, `t.screen.getByRole` / `getByTestId`, `t.click`, `t.type`, `t.expect`, and `t.mockFetch` as needed — see `src/sandbox/types.ts` (`TestApi`) and existing exercises.
-5. The suite asserts that starter code does **not** pass and that the reference solution **does**. Run:
+4. Add a `solutionExplanation`: a few sentences on the approach, shown in the Solution tab after the first submit.
+5. Keep `run` self-contained. Use `t.render()`, `t.screen.getByRole` / `getByTestId`, `t.click`, `t.type`, `t.expect`, and `t.mockFetch` as needed — see `src/sandbox/types.ts` (`TestApi`) and existing exercises.
+6. The suite asserts that starter code does **not** pass and that the reference solution **does**. Run:
 
 ```bash
 npm test -- tests/exercises.test.ts

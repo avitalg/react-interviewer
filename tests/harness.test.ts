@@ -37,6 +37,7 @@ const exercise: Exercise = {
   description: "",
   requirements: [{ id: "r1", text: "" }],
   starterCode: "",
+  solutionExplanation: "",
   referenceSolution: "",
   mockApi: (url) => (url.pathname === "/api/user" ? { body: { name: "Ada" }, delay: 20 } : { status: 404 }),
   checks: [
