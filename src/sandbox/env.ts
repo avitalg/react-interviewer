@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { installFormSubmitShim } from "./forms";
 import type { MockApi, MockResponse } from "./types";
 
 export type SandboxWindow = Window & typeof globalThis & Record<string, any>;
@@ -51,6 +52,7 @@ export function createEnv(win: SandboxWindow): SandboxEnv {
 
   ensureStorage(win);
   lockdown(win);
+  installFormSubmitShim(win);
 
   const env: SandboxEnv = { win, React, ReactDOM, real, ErrorBoundary };
   win.fetch = createMockFetch(env, { getApi: () => undefined, allowNetwork: false }) as typeof fetch;
