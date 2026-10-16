@@ -105,6 +105,231 @@ export default function App() {
     ],
   },
   {
+    id: "forms-tip-calculator",
+    topic: "forms",
+    title: "Live tip calculator",
+    difficulty: "Easy",
+    solutionExplanation: `Keep bill and tip percent in state and compute tip and total during render. There is no Calculate button — \`onChange\` is enough because a re-render already has the new values.`,
+    description: `Read the inputs as the user types and show the tip and total immediately. No submit or Calculate button.`,
+    requirements: [
+      { id: "fields", text: "Controlled inputs labelled `Bill` and `Tip %`." },
+      { id: "live", text: "As you type, show `Tip: $1.50` and `Total: $11.50` for a $10 bill and 15% tip (two decimal places). Empty or invalid numbers count as 0." },
+      { id: "no-button", text: "No button — the amounts come from the inputs alone." },
+    ],
+    starterCode: `import { useState } from 'react';
+
+export default function App() {
+  const [bill, setBill] = useState('');
+  const [tip, setTip] = useState('');
+  const [total, setTotal] = useState(null);
+
+  function calculate() {
+    const amount = Number(bill);
+    const percent = Number(tip);
+    setTotal(amount + (amount * percent) / 100);
+  }
+
+  return (
+    <div>
+      <label>
+        Bill <input value={bill} onChange={(e) => setBill(e.target.value)} />
+      </label>
+      <label>
+        Tip % <input value={tip} onChange={(e) => setTip(e.target.value)} />
+      </label>
+      <button onClick={calculate}>Calculate</button>
+      {total != null && <p>Total: \${total.toFixed(2)}</p>}
+    </div>
+  );
+}
+`,
+    referenceSolution: `import { useState } from 'react';
+
+function money(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+export default function App() {
+  const [bill, setBill] = useState('');
+  const [tip, setTip] = useState('');
+
+  const amount = money(bill);
+  const percent = money(tip);
+  const tipAmount = (amount * percent) / 100;
+  const total = amount + tipAmount;
+
+  return (
+    <div>
+      <label>
+        Bill <input value={bill} onChange={(e) => setBill(e.target.value)} />
+      </label>
+      <label>
+        Tip % <input value={tip} onChange={(e) => setTip(e.target.value)} />
+      </label>
+      <p>Tip: \${tipAmount.toFixed(2)}</p>
+      <p>Total: \${total.toFixed(2)}</p>
+    </div>
+  );
+}
+`,
+    checks: [
+      {
+        id: "fields",
+        requirementId: "fields",
+        label: "Has labelled Bill and Tip % inputs",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          t.assert(t.screen.queryByLabelText("Bill"), 'Expected an input labelled "Bill".');
+          t.assert(t.screen.queryByLabelText("Tip %"), 'Expected an input labelled "Tip %".');
+        },
+      },
+      {
+        id: "live",
+        requirementId: "live",
+        label: "Tip and total update as you type",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          const bill = t.screen.getByLabelText("Bill");
+          const tip = t.screen.getByLabelText("Tip %");
+          await t.type(bill, "10");
+          await t.type(tip, "15");
+          t.assert(t.screen.queryByText("Tip: $1.50"), 'A $10 bill at 15% should show "Tip: $1.50".');
+          t.assert(t.screen.queryByText("Total: $11.50"), 'A $10 bill at 15% should show "Total: $11.50".');
+        },
+      },
+      {
+        id: "no-button",
+        requirementId: "no-button",
+        label: "There is no Calculate or submit button",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          t.assert(!t.screen.queryByRole("button"), "Don't use a button — derive tip and total from the inputs.");
+        },
+      },
+      { id: "controlled", requirementId: "fields", label: "Inputs are controlled", kind: "static", rule: { rule: "controlledInputs" } },
+    ],
+  },
+  {
+    id: "forms-temperature",
+    topic: "forms",
+    title: "Celsius / Fahrenheit converter",
+    difficulty: "Medium",
+    solutionExplanation: `Keep both fields in state. On each \`onChange\`, write the field the user typed and convert the other (\`C × 9/5 + 32\` and \`(F − 32) × 5/9\`). An empty string clears both so you are not converting \`NaN\`.`,
+    description: `Convert between Celsius and Fahrenheit as the user types. No Convert button — each input is the source of the other value.`,
+    requirements: [
+      { id: "fields", text: "Controlled inputs labelled `Celsius` and `Fahrenheit`." },
+      { id: "convert", text: "Typing a number in one field updates the other immediately (`C × 9/5 + 32`, `(F − 32) × 5/9`). Clearing one field clears the other." },
+      { id: "no-button", text: "No Convert or submit button." },
+    ],
+    starterCode: `import { useState } from 'react';
+
+export default function App() {
+  const [celsius, setCelsius] = useState('');
+  const [fahrenheit, setFahrenheit] = useState('');
+
+  function convert() {
+    setFahrenheit(String(Number(celsius) * (9 / 5) + 32));
+  }
+
+  return (
+    <div>
+      <label>
+        Celsius <input value={celsius} onChange={(e) => setCelsius(e.target.value)} />
+      </label>
+      <button onClick={convert}>Convert</button>
+      <label>
+        Fahrenheit <input value={fahrenheit} readOnly />
+      </label>
+    </div>
+  );
+}
+`,
+    referenceSolution: `import { useState } from 'react';
+
+function toFahrenheit(celsius) {
+  return Number(celsius) * (9 / 5) + 32;
+}
+
+function toCelsius(fahrenheit) {
+  return ((Number(fahrenheit) - 32) * 5) / 9;
+}
+
+export default function App() {
+  const [celsius, setCelsius] = useState('');
+  const [fahrenheit, setFahrenheit] = useState('');
+
+  function onCelsius(event) {
+    const next = event.target.value;
+    setCelsius(next);
+    setFahrenheit(next === '' ? '' : String(toFahrenheit(next)));
+  }
+
+  function onFahrenheit(event) {
+    const next = event.target.value;
+    setFahrenheit(next);
+    setCelsius(next === '' ? '' : String(toCelsius(next)));
+  }
+
+  return (
+    <div>
+      <label>
+        Celsius <input value={celsius} onChange={onCelsius} />
+      </label>
+      <label>
+        Fahrenheit <input value={fahrenheit} onChange={onFahrenheit} />
+      </label>
+    </div>
+  );
+}
+`,
+    checks: [
+      {
+        id: "fields",
+        requirementId: "fields",
+        label: "Has labelled Celsius and Fahrenheit inputs",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          t.assert(t.screen.queryByLabelText("Celsius"), 'Expected an input labelled "Celsius".');
+          t.assert(t.screen.queryByLabelText("Fahrenheit"), 'Expected an input labelled "Fahrenheit".');
+        },
+      },
+      {
+        id: "convert",
+        requirementId: "convert",
+        label: "Each input updates the other as you type",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          const celsius = t.screen.getByLabelText("Celsius") as HTMLInputElement;
+          const fahrenheit = t.screen.getByLabelText("Fahrenheit") as HTMLInputElement;
+          await t.type(celsius, "100");
+          t.expect(fahrenheit.value, "Fahrenheit after typing 100°C").toBe("212");
+          await t.clear(celsius);
+          t.expect(celsius.value, "Celsius after clear").toBe("");
+          t.expect(fahrenheit.value, "Fahrenheit after clearing Celsius").toBe("");
+          await t.type(fahrenheit, "32");
+          t.expect(celsius.value, "Celsius after typing 32°F").toBe("0");
+        },
+      },
+      {
+        id: "no-button",
+        requirementId: "no-button",
+        label: "There is no Convert or submit button",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          t.assert(!t.screen.queryByRole("button"), "Don't use a button — convert in onChange.");
+        },
+      },
+      { id: "controlled", requirementId: "fields", label: "Inputs are controlled", kind: "static", rule: { rule: "controlledInputs" } },
+    ],
+  },
+  {
     id: "forms-signup",
     topic: "forms",
     title: "Sign-up form with validation",
