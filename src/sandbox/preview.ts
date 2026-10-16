@@ -6,7 +6,9 @@ type Post = (message: SandboxToParent) => void;
 
 /** Browser noise that isn't a bug in the user's component. */
 export function isBenignRuntimeError(message: string): boolean {
-  return /ResizeObserver loop|undelivered notifications|Script error\.?$|Failed to connect to MetaMask/i.test(message);
+  return /ResizeObserver loop|undelivered notifications|Script error\.?$|Failed to connect to MetaMask|Blocked form submission|sandboxed and the 'allow-forms' permission is not set/i.test(
+    message,
+  );
 }
 
 function toSandboxError(error: unknown, phase: SandboxError["phase"]): SandboxError {
@@ -35,11 +37,53 @@ export function startPreview(env: SandboxEnv, post: Post) {
     }, 0);
   };
 
+  const isSubmitControl = (el: EventTarget | null): el is HTMLElement => {
+    if (!el || !("tagName" in el)) return false;
+    const node = el as HTMLElement;
+    if (node.tagName === "BUTTON") return (node as HTMLButtonElement).type === "submit";
+    if (node.tagName === "INPUT") {
+      const type = (node as HTMLInputElement).type;
+      return type === "submit" || type === "image";
+    }
+    return false;
+  };
+
+  const synthesizeSubmit = (form: HTMLFormElement) => {
+    form.dispatchEvent(new win.SubmitEvent("submit", { bubbles: true, cancelable: true }));
+  };
+
   win.addEventListener("error", (event: ErrorEvent) => reportRuntime(event.error ?? new Error(event.message)));
   win.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
     if (event.reason?.name === "AbortError") return;
     reportRuntime(event.reason);
   });
+  // Chrome does not fire `submit` in a frame without allow-forms; it only logs a
+  // sandbox block. Synthesize a cancelable submit so React onSubmit still runs.
+  win.addEventListener("submit", (event) => event.preventDefault(), true);
+  win.addEventListener(
+    "click",
+    (event) => {
+      const el = event.target as HTMLElement | null;
+      const control = el?.closest?.("button, input") ?? el;
+      if (!isSubmitControl(control)) return;
+      const form = (control as HTMLButtonElement).form ?? control.closest("form");
+      if (!form) return;
+      event.preventDefault();
+      synthesizeSubmit(form);
+    },
+    true,
+  );
+  win.addEventListener(
+    "keydown",
+    (event) => {
+      if (event.key !== "Enter" || event.repeat) return;
+      const el = event.target as HTMLInputElement | null;
+      if (!el || el.tagName !== "INPUT" || !el.form) return;
+      event.preventDefault();
+      synthesizeSubmit(el.form);
+    },
+    true,
+  );
 
   function Reporter({ onCommit }: { onCommit: () => void }) {
     React.useEffect(() => {

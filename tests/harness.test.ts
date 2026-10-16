@@ -148,6 +148,11 @@ describe("sandbox message filtering", () => {
     expect(isBenignRuntimeError("ResizeObserver loop completed with undelivered notifications.")).toBe(true);
     expect(isBenignRuntimeError("Script error.")).toBe(true);
     expect(isBenignRuntimeError("Failed to connect to MetaMask")).toBe(true);
+    expect(
+      isBenignRuntimeError(
+        "Blocked form submission to '' because the form's frame is sandboxed and the 'allow-forms' permission is not set.",
+      ),
+    ).toBe(true);
     expect(isBenignRuntimeError("Cannot read properties of null")).toBe(false);
   });
 });
