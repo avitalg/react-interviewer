@@ -123,6 +123,137 @@ export default function App() {
     ],
   },
   {
+    id: "hooks-use-hover",
+    topic: "hooks",
+    title: "useHover",
+    difficulty: "Easy",
+    solutionExplanation: `Return a ref and a boolean. After mount, attach \`mouseenter\` / \`mouseleave\` to \`ref.current\` and flip the boolean. The effect cleanup must remove those listeners so they don't leak after unmount.`,
+    description: `Write \`useHover\`: it tells you whether the mouse is over a DOM node. Attach listeners to the node the caller points at with a ref — don't put \`onMouseEnter\` in the hook itself.`,
+    requirements: [
+      { id: "api", text: "Export `useHover()` returning `[ref, hovered]`. `hovered` starts `false`." },
+      { id: "listen", text: "When `ref` is set on a node, `mouseenter` sets `hovered` to `true` and `mouseleave` sets it to `false`. Remove the listeners on unmount." },
+      { id: "app", text: "`App` puts the ref on a `Hover me` box (`data-testid=\"pad\"`) and shows `Inside` or `Outside` in `data-testid=\"status\"`." },
+    ],
+    starterCode: `import { useRef, useState } from 'react';
+
+export function useHover() {
+  const ref = useRef(null);
+  const [hovered, setHovered] = useState(false);
+  // TODO: listen for mouseenter / mouseleave on ref.current
+  return [ref, hovered];
+}
+
+export default function App() {
+  const [ref, hovered] = useHover();
+
+  return (
+    <div>
+      <p data-testid="status">{hovered ? 'Inside' : 'Outside'}</p>
+      <div ref={ref} data-testid="pad">
+        Hover me
+      </div>
+    </div>
+  );
+}
+`,
+    referenceSolution: `import { useEffect, useRef, useState } from 'react';
+
+export function useHover() {
+  const ref = useRef(null);
+  const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return undefined;
+    const enter = () => setHovered(true);
+    const leave = () => setHovered(false);
+    node.addEventListener('mouseenter', enter);
+    node.addEventListener('mouseleave', leave);
+    return () => {
+      node.removeEventListener('mouseenter', enter);
+      node.removeEventListener('mouseleave', leave);
+    };
+  }, []);
+
+  return [ref, hovered];
+}
+
+export default function App() {
+  const [ref, hovered] = useHover();
+
+  return (
+    <div>
+      <p data-testid="status">{hovered ? 'Inside' : 'Outside'}</p>
+      <div ref={ref} data-testid="pad">
+        Hover me
+      </div>
+    </div>
+  );
+}
+`,
+    checks: [
+      {
+        id: "api",
+        requirementId: "api",
+        label: "useHover returns [ref, false] at first",
+        kind: "runtime",
+        async run(t: TestApi) {
+          t.assert(typeof t.exports.useHover === "function", "Export a `useHover` hook.");
+          const hook = await t.renderHook<[ { current: unknown }, boolean ]>(() => t.exports.useHover());
+          t.assert(hook.result.current[0] && "current" in hook.result.current[0], "The first value should be a ref (`{ current }`).");
+          t.expect(hook.result.current[1], "hovered before the pointer enters").toBe(false);
+        },
+      },
+      {
+        id: "listen",
+        requirementId: "listen",
+        label: "mouseenter / mouseleave update hovered",
+        kind: "runtime",
+        async run(t: TestApi) {
+          const React = t.React as { createElement: (...args: unknown[]) => unknown };
+          const { MouseEvent } = t.window as unknown as typeof globalThis;
+          function Probe() {
+            const [ref, hovered] = t.exports.useHover();
+            return React.createElement("div", { ref, "data-testid": "target" }, hovered ? "yes" : "no");
+          }
+          await t.render(Probe);
+          const node = t.screen.getByTestId("target");
+          t.expect(node.textContent, "Before enter").toBe("no");
+          await t.act(() => {
+            node.dispatchEvent(new MouseEvent("mouseenter", { bubbles: false, view: t.window }));
+          });
+          t.expect(node.textContent, "After mouseenter").toBe("yes");
+          await t.act(() => {
+            node.dispatchEvent(new MouseEvent("mouseleave", { bubbles: false, view: t.window }));
+          });
+          t.expect(node.textContent, "After mouseleave").toBe("no");
+        },
+      },
+      {
+        id: "app",
+        requirementId: "app",
+        label: "The Hover me box reports Inside / Outside",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          t.expect(t.screen.getByTestId("status").textContent?.trim(), "Status").toBe("Outside");
+          const pad = t.screen.getByTestId("pad");
+          t.assert(pad.textContent?.includes("Hover me"), 'The pad should say "Hover me".');
+          const { MouseEvent } = t.window as unknown as typeof globalThis;
+          await t.act(() => {
+            pad.dispatchEvent(new MouseEvent("mouseenter", { bubbles: false, view: t.window }));
+          });
+          t.expect(t.screen.getByTestId("status").textContent?.trim(), "Status while hovered").toBe("Inside");
+          await t.act(() => {
+            pad.dispatchEvent(new MouseEvent("mouseleave", { bubbles: false, view: t.window }));
+          });
+          t.expect(t.screen.getByTestId("status").textContent?.trim(), "Status after leave").toBe("Outside");
+        },
+      },
+      { id: "has-cleanup", requirementId: "listen", label: "The listener effect cleans up", kind: "static", rule: { rule: "effectHasCleanup" } },
+    ],
+  },
+  {
     id: "hooks-use-local-storage",
     topic: "hooks",
     title: "useLocalStorage",
@@ -244,6 +375,157 @@ export default function App() {
           await t.unmount();
           await t.render();
           t.expect((t.screen.getByLabelText("Name") as HTMLInputElement).value, "Input value after remounting").toBe("Ada");
+        },
+      },
+    ],
+  },
+  {
+    id: "hooks-use-fetch",
+    topic: "hooks",
+    title: "useFetch",
+    difficulty: "Medium",
+    solutionExplanation: `Fetch inside an effect that depends on \`url\`. Track \`data\`, \`loading\`, and \`error\`, and set an \`ignore\` flag in the cleanup so a slow response cannot overwrite a newer request or land after unmount. \`fetch\` does not throw on 404/500 — check \`response.ok\`.`,
+    description: `Extract data fetching into \`useFetch(url)\` so any component can load JSON with loading and error states.
+
+The starter fetches once and never ignores stale responses, so a slow first request can overwrite a later one.`,
+    requirements: [
+      { id: "data", text: "Export `useFetch(url)` returning `{ data, loading, error }`. It fetches `url`, reads JSON into `data`, and sets `loading` to `true` while the request is in flight." },
+      { id: "error", text: "If the response is not OK or `fetch` rejects, set `error` and stop loading. Don't keep the previous `data`." },
+      { id: "stale", text: "If `url` changes or the component unmounts, ignore the previous response." },
+      { id: "app", text: "`App` calls `useFetch('/api/user')` and shows the user's `name`, or `Loading…` / `Failed`." },
+    ],
+    mockApi: (url) => {
+      if (url.pathname !== "/api/user") return { status: 404, body: { error: "Not found" } };
+      return { delay: 200, body: { name: "Ada Lovelace" } };
+    },
+    starterCode: `import { useEffect, useState } from 'react';
+
+export function useFetch(url) {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch(url)
+      .then((response) => response.json())
+      .then(setData);
+  }, []);
+
+  return { data, loading: false, error: null };
+}
+
+export default function App() {
+  const { data } = useFetch('/api/user');
+  return <p>{data ? data.name : '…'}</p>;
+}
+`,
+    referenceSolution: `import { useEffect, useState } from 'react';
+
+export function useFetch(url) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let ignore = false;
+    setLoading(true);
+    setError(null);
+    setData(null);
+    fetch(url)
+      .then((response) => {
+        if (!response.ok) throw new Error('Request failed');
+        return response.json();
+      })
+      .then((json) => {
+        if (ignore) return;
+        setData(json);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (ignore) return;
+        setError(err);
+        setData(null);
+        setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [url]);
+
+  return { data, loading, error };
+}
+
+export default function App() {
+  const { data, loading, error } = useFetch('/api/user');
+  if (loading) return <p>Loading…</p>;
+  if (error) return <p>Failed</p>;
+  return <p>{data.name}</p>;
+}
+`,
+    checks: [
+      {
+        id: "data",
+        requirementId: "data",
+        label: "Fetches JSON and reports loading",
+        kind: "runtime",
+        async run(t: TestApi) {
+          t.assert(typeof t.exports.useFetch === "function", "Export a `useFetch` hook.");
+          t.mockFetch(() => ({ delay: 40, body: { name: "Ada" } }));
+          const hook = await t.renderHook<{ data: { name: string } | null; loading: boolean; error: unknown }>(
+            (url) => t.exports.useFetch(url),
+            "/api/user",
+          );
+          t.expect(hook.result.current.loading, "loading just after mount").toBe(true);
+          t.expect(hook.result.current.data, "data just after mount").toBe(null);
+          await t.waitFor(() => t.expect(hook.result.current.data, "data after the response").toEqual({ name: "Ada" }));
+          t.expect(hook.result.current.loading, "loading after the response").toBe(false);
+          t.expect(t.fetchCalls.map((call) => call.url), "Requests").toEqual(["/api/user"]);
+        },
+      },
+      {
+        id: "error",
+        requirementId: "error",
+        label: "Non-OK responses set error",
+        kind: "runtime",
+        async run(t: TestApi) {
+          t.mockFetch(() => ({ status: 500, body: { error: "nope" } }));
+          const hook = await t.renderHook<{ data: unknown; loading: boolean; error: unknown }>(
+            (url) => t.exports.useFetch(url),
+            "/api/user",
+          );
+          await t.waitFor(() => t.assert(hook.result.current.error, "error should be set after a 500"));
+          t.expect(hook.result.current.loading, "loading after the error").toBe(false);
+          t.expect(hook.result.current.data, "data after the error").toBe(null);
+        },
+      },
+      {
+        id: "stale",
+        requirementId: "stale",
+        label: "Ignores a slower previous request",
+        kind: "runtime",
+        async run(t: TestApi) {
+          t.mockFetch((url) =>
+            url.pathname === "/slow" ? { delay: 80, body: { id: "slow" } } : { delay: 10, body: { id: "fast" } },
+          );
+          const hook = await t.renderHook<{ data: { id: string } | null; loading: boolean; error: unknown }>(
+            (url) => t.exports.useFetch(url),
+            "/slow",
+          );
+          await hook.rerender("/fast");
+          await t.waitFor(() => t.expect(hook.result.current.data?.id, "data after switching url").toBe("fast"));
+          await t.sleep(100);
+          t.expect(hook.result.current.data?.id, "data after the slow response arrives").toBe("fast");
+        },
+      },
+      {
+        id: "app",
+        requirementId: "app",
+        label: "App shows the user, loading, or Failed",
+        kind: "runtime",
+        async run(t: TestApi) {
+          t.mockFetch(() => ({ delay: 30, body: { name: "Ada Lovelace" } }));
+          await t.render();
+          t.assert(t.screen.queryByText(/Loading/), 'Show "Loading…" while fetching.');
+          await t.waitFor(() => t.assert(t.screen.queryByText("Ada Lovelace"), "Show the user's name once loaded."));
+          t.assert(!t.screen.queryByText(/Loading/), "Hide the loading state after success.");
         },
       },
     ],

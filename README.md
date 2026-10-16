@@ -6,7 +6,7 @@ Practice React interview exercises in the browser: write code in a live editor, 
 
 ## Features
 
-- **40 exercises** across 12 topics, from JSX through data fetching
+- **43 exercises** across 12 topics, from JSX through data fetching
 - **Live editor and preview** — CodeMirror plus a sandboxed React 18 iframe
 - **Automated checks** — static AST rules (hooks, keys, effects, mutation) and runtime tests that click, type, and assert like a real UI test
 - **Feedback you can act on** — pass / partial / not-yet per requirement, plus a suggested fix you can apply in one click

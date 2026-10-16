@@ -75,6 +75,94 @@ export default function App() {
     ],
   },
   {
+    id: "refs-forward-ref",
+    topic: "refs",
+    title: "Forward a ref through TextInput",
+    difficulty: "Medium",
+    solutionExplanation: `Function components don't receive \`ref\` as a prop. Wrap \`TextInput\` in \`forwardRef\` and put that ref on the real \`<input>\` — not the \`<label>\` — so \`inputRef.current.focus()\` reaches the DOM node.`,
+    description: `\`App\` already has a ref and a **Focus name** button. \`TextInput\` swallows the ref because function components don't take \`ref\` as a normal prop.
+
+Use \`forwardRef\` so the parent can focus the inner input.`,
+    requirements: [
+      { id: "field", text: "`TextInput` renders a `Name` labelled input (placeholder `Your name`)." },
+      { id: "forward", text: "Wrap `TextInput` in `forwardRef` and attach the ref to the `<input>` (not the label)." },
+      { id: "focus", text: "**Focus name** focuses that input via the ref. Don't query the DOM with `document.*`." },
+    ],
+    starterCode: `import { useRef } from 'react';
+
+function TextInput({ label, ...props }) {
+  return (
+    <label>
+      {label} <input {...props} />
+    </label>
+  );
+}
+
+export default function App() {
+  const inputRef = useRef(null);
+
+  return (
+    <div>
+      <TextInput ref={inputRef} label="Name" placeholder="Your name" />
+      <button onClick={() => inputRef.current.focus()}>Focus name</button>
+    </div>
+  );
+}
+`,
+    referenceSolution: `import { forwardRef, useRef } from 'react';
+
+const TextInput = forwardRef(function TextInput({ label, ...props }, ref) {
+  return (
+    <label>
+      {label} <input ref={ref} {...props} />
+    </label>
+  );
+});
+
+export default function App() {
+  const inputRef = useRef(null);
+
+  return (
+    <div>
+      <TextInput ref={inputRef} label="Name" placeholder="Your name" />
+      <button onClick={() => inputRef.current.focus()}>Focus name</button>
+    </div>
+  );
+}
+`,
+    checks: [
+      {
+        id: "field",
+        requirementId: "field",
+        label: "TextInput renders a Name field",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          const input = t.screen.queryByLabelText("Name") as HTMLInputElement | null;
+          t.assert(input && input.tagName === "INPUT", 'Expected an <input> labelled "Name".');
+          t.expect(input.getAttribute("placeholder"), "placeholder").toBe("Your name");
+        },
+      },
+      {
+        id: "focus",
+        requirementId: "focus",
+        label: "Focus name focuses the input",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          const input = t.screen.getByLabelText("Name") as HTMLInputElement;
+          input.blur();
+          await t.click(t.screen.getByRole("button", { name: "Focus name" }));
+          t.assert(t.document.activeElement === input, 'Clicking "Focus name" should focus the Name input. Forward the ref onto the <input>, not the label.');
+        },
+      },
+      { id: "defines", requirementId: "forward", label: "Defines TextInput", kind: "static", rule: { rule: "definesComponent", name: "TextInput" } },
+      { id: "forwards", requirementId: "forward", label: "Uses forwardRef", kind: "static", rule: { rule: "usesIdentifier", name: "forwardRef" } },
+      { id: "use-ref", requirementId: "focus", label: "Uses useRef", kind: "static", rule: { rule: "usesHook", hook: "useRef" } },
+      { id: "no-dom", requirementId: "focus", label: "Doesn't query the DOM directly", kind: "static", rule: { rule: "noDirectDom" } },
+    ],
+  },
+  {
     id: "refs-previous-value",
     topic: "refs",
     title: "usePrevious hook",
