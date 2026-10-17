@@ -330,6 +330,150 @@ export default function App() {
     ],
   },
   {
+    id: "forms-autosave",
+    topic: "forms",
+    title: "Autosave as you type",
+    difficulty: "Easy",
+    solutionExplanation: `Keep Name and Bio in state. An effect that depends on both POSTs \`{ name, bio }\` to \`/api/draft\` whenever either field has a value. There is no Save button — \`onChange\` already has the new values, and the effect sends that snapshot.`,
+    description: `Send the current field values to an API as the user types. No Save or submit button — the latest state is enough.`,
+    requirements: [
+      { id: "fields", text: "Controlled inputs labelled `Name` and `Bio`." },
+      { id: "save", text: "As you type, `POST /api/draft` with JSON `{ name, bio }`. Show `Saved` after a successful response. Don't send when both fields are empty." },
+      { id: "no-button", text: "No Save or submit button — send from the input values." },
+    ],
+    starterCode: `import { useState } from 'react';
+
+export default function App() {
+  const [name, setName] = useState('');
+  const [bio, setBio] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  function save() {
+    fetch('/api/draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, bio }),
+    }).then(() => setSaved(true));
+  }
+
+  return (
+    <div>
+      <label>
+        Name <input value={name} onChange={(e) => setName(e.target.value)} />
+      </label>
+      <label>
+        Bio <input value={bio} onChange={(e) => setBio(e.target.value)} />
+      </label>
+      <button onClick={save}>Save</button>
+      {saved && <p>Saved</p>}
+    </div>
+  );
+}
+`,
+    referenceSolution: `import { useEffect, useState } from 'react';
+
+export default function App() {
+  const [name, setName] = useState('');
+  const [bio, setBio] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (!name && !bio) return;
+    setSaved(false);
+    fetch('/api/draft', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, bio }),
+    }).then((response) => {
+      if (response.ok) setSaved(true);
+    });
+  }, [name, bio]);
+
+  return (
+    <div>
+      <label>
+        Name <input value={name} onChange={(e) => setName(e.target.value)} />
+      </label>
+      <label>
+        Bio <input value={bio} onChange={(e) => setBio(e.target.value)} />
+      </label>
+      {saved && <p>Saved</p>}
+    </div>
+  );
+}
+`,
+    mockApi: (url) => {
+      if (url.pathname !== "/api/draft") return { status: 404, body: { error: "Not found" } };
+      return { delay: 40, body: { saved: true } };
+    },
+    checks: [
+      {
+        id: "fields",
+        requirementId: "fields",
+        label: "Has labelled Name and Bio inputs",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          t.assert(t.screen.queryByLabelText("Name"), 'Expected an input labelled "Name".');
+          t.assert(t.screen.queryByLabelText("Bio"), 'Expected an input labelled "Bio".');
+        },
+      },
+      {
+        id: "save",
+        requirementId: "save",
+        label: "POSTs the current values as you type",
+        kind: "runtime",
+        async run(t: TestApi) {
+          function lastDraft() {
+            const calls = t.fetchCalls.filter((call) => call.url === "/api/draft");
+            t.assert(calls.length > 0, "Expected a request to /api/draft as you type.");
+            const last = calls[calls.length - 1];
+            t.expect(String(last.init?.method ?? "GET").toUpperCase(), "Request method").toBe("POST");
+            return JSON.parse(String(last.init?.body ?? "{}")) as { name?: string; bio?: string };
+          }
+
+          await t.render();
+          const name = t.screen.getByLabelText("Name");
+          const bio = t.screen.getByLabelText("Bio");
+          await t.type(name, "Ada");
+          await t.waitFor(() => {
+            t.assert(t.screen.queryByText("Saved"), 'Show "Saved" after the draft is posted.');
+            t.expect(lastDraft().name, "Posted name").toBe("Ada");
+          });
+          await t.type(bio, "Engineer");
+          await t.waitFor(() => {
+            const draft = lastDraft();
+            t.expect(draft.name, "Posted name after editing Bio").toBe("Ada");
+            t.expect(draft.bio, "Posted bio").toBe("Engineer");
+            t.assert(t.screen.queryByText("Saved"), 'Show "Saved" after both fields are posted.');
+          });
+        },
+      },
+      {
+        id: "empty",
+        requirementId: "save",
+        label: "Does not send while both fields are empty",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          await t.sleep(50);
+          t.expect(t.fetchCalls.length, "Requests sent with empty fields").toBe(0);
+        },
+      },
+      {
+        id: "no-button",
+        requirementId: "no-button",
+        label: "There is no Save or submit button",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          t.assert(!t.screen.queryByRole("button"), "Don't use a button — send the values as the inputs change.");
+        },
+      },
+      { id: "controlled", requirementId: "fields", label: "Inputs are controlled", kind: "static", rule: { rule: "controlledInputs" } },
+    ],
+  },
+  {
     id: "forms-signup",
     topic: "forms",
     title: "Sign-up form with validation",

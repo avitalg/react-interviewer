@@ -6,7 +6,7 @@ Practice React interview exercises in the browser: write code in a live editor, 
 
 ## Features
 
-- **43 exercises** across 12 topics, from JSX through data fetching
+- **44 exercises** across 12 topics, from JSX through data fetching
 - **Live editor and preview** — CodeMirror plus a sandboxed React 18 iframe
 - **Automated checks** — static AST rules (hooks, keys, effects, mutation) and runtime tests that click, type, and assert like a real UI test
 - **Feedback you can act on** — pass / partial / not-yet per requirement, plus a suggested fix you can apply in one click
@@ -21,7 +21,7 @@ Practice React interview exercises in the browser: write code in a live editor, 
 | Props & Composition | Button variants, card slots, compound Tabs |
 | State (`useState`) | Counter, todo list, undo/redo |
 | Effects & Lifecycle | Document title, countdown, stopwatch with laps |
-| Events & Forms | Live input, sign-up validation, dynamic guest list |
+| Events & Forms | Live input, autosave, sign-up validation, dynamic guest list |
 | Lists & Keys | Render, filter, sortable table |
 | Conditional Rendering | Login view, accordion, accessible modal |
 | Refs (`useRef`) | Focus input, `usePrevious`, outside-click dropdown |
