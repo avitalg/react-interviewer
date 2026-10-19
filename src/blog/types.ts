@@ -6,6 +6,8 @@ export interface ArticleFaq {
 export interface Article {
   slug: string;
   title: string;
+  /** Page H1 when it should differ from the title tag. */
+  headline?: string;
   description: string;
   date: string;
   tags: string[];

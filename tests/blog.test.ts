@@ -59,6 +59,27 @@ A key is an identity.
     ]);
   });
 
+  it("parses tables and images", () => {
+    const blocks = parseMarkdown(`![useEffect cleanup function lifecycle diagram](/blog/diagram.svg)
+
+| Side effect | Cleanup |
+| --- | --- |
+| \`setInterval\` | \`clearInterval(id)\` |
+`);
+    expect(blocks).toEqual([
+      {
+        type: "image",
+        alt: "useEffect cleanup function lifecycle diagram",
+        src: "/blog/diagram.svg",
+      },
+      {
+        type: "table",
+        headers: ["Side effect", "Cleanup"],
+        rows: [["`setInterval`", "`clearInterval(id)`"]],
+      },
+    ]);
+  });
+
   it("slugifies headings without backticks", () => {
     expect(slugify("When to use `useEffect`")).toBe("when-to-use-useeffect");
   });

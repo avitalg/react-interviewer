@@ -12,8 +12,10 @@ import { post as top5 } from "./top-5-react-interview";
 import { post as tenConcepts } from "./10-react-concepts";
 import { post as effects } from "./useeffect-interview-questions";
 import { post as state } from "./usestate-vs-usereducer-vs-useref";
+import { post as cleanup } from "./react-useeffect-cleanup-function";
 
 export const articles: Article[] = [
+  cleanup,
   top5,
   aiEra,
   questions,

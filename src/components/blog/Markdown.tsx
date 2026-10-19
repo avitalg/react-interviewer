@@ -106,6 +106,49 @@ export function Markdown({ source, className }: { source: string; className?: st
             </List>
           );
         }
+        if (block.type === "table") {
+          return (
+            <div key={index} className="overflow-x-auto rounded-lg border border-border">
+              <table className="w-full min-w-[28rem] border-collapse text-sm">
+                <thead className="bg-surface-2">
+                  <tr>
+                    {block.headers.map((header) => (
+                      <th key={header} className="px-3 py-2 text-left font-semibold">
+                        <Inline text={header} />
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {block.rows.map((row, rowIndex) => (
+                    <tr key={rowIndex} className="border-t border-border">
+                      {row.map((cell, cellIndex) => (
+                        <td key={cellIndex} className="px-3 py-2 align-top text-fg/90">
+                          <Inline text={cell} />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        }
+        if (block.type === "image") {
+          return (
+            <figure key={index} className="overflow-hidden rounded-lg border border-border bg-surface">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={block.src}
+                alt={block.alt}
+                loading="lazy"
+                width={960}
+                height={220}
+                className="block h-auto w-full"
+              />
+            </figure>
+          );
+        }
         if (block.type === "code") {
           return (
             <pre

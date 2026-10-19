@@ -2,7 +2,9 @@ export type MarkdownBlock =
   | { type: "h2" | "h3"; text: string; id: string }
   | { type: "p"; text: string }
   | { type: "ul" | "ol"; items: string[] }
-  | { type: "code"; lang: string; code: string };
+  | { type: "code"; lang: string; code: string }
+  | { type: "table"; headers: string[]; rows: string[][] }
+  | { type: "image"; alt: string; src: string };
 
 export function slugify(text: string): string {
   return text
@@ -12,14 +14,29 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+const imagePattern = /^!\[([^\]]*)\]\(([^)]+)\)$/;
+
 function isBlockStart(line: string): boolean {
   return (
     line.startsWith("```") ||
     line.startsWith("## ") ||
     line.startsWith("### ") ||
     line.startsWith("- ") ||
+    line.startsWith("|") ||
+    imagePattern.test(line.trim()) ||
     /^\d+\. /.test(line)
   );
+}
+
+function splitTableRow(line: string): string[] {
+  return line
+    .replace(/^\||\|$/g, "")
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function isTableSeparator(line: string): boolean {
+  return /^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/.test(line.trim());
 }
 
 export function parseMarkdown(source: string): MarkdownBlock[] {
@@ -87,6 +104,26 @@ export function parseMarkdown(source: string): MarkdownBlock[] {
         i += 1;
       }
       blocks.push({ type: "ol", items });
+      continue;
+    }
+
+    const image = line.trim().match(imagePattern);
+    if (image) {
+      blocks.push({ type: "image", alt: image[1], src: image[2] });
+      i += 1;
+      continue;
+    }
+
+    if (line.startsWith("|")) {
+      const rows: string[][] = [];
+      while (i < lines.length && lines[i].startsWith("|")) {
+        if (!isTableSeparator(lines[i])) rows.push(splitTableRow(lines[i]));
+        i += 1;
+      }
+      if (rows.length > 0) {
+        const [headers, ...body] = rows;
+        blocks.push({ type: "table", headers, rows: body });
+      }
       continue;
     }
 

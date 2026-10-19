@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
   const article = getArticle(slug);
   if (!article) notFound();
   return {
-    title: article.title,
+    title: article.headline ? { absolute: article.title } : article.title,
     description: article.description,
     keywords: article.tags,
     alternates: { canonical: `/blog/${article.slug}` },
@@ -28,6 +28,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">): P
       description: article.description,
       type: "article",
       publishedTime: article.date,
+      modifiedTime: article.date,
       url: `/blog/${article.slug}`,
     },
     twitter: {
@@ -58,14 +59,26 @@ async function Article({ params }: { params: PageProps<"/blog/[slug]">["params"]
       <JsonLd
         data={{
           "@context": "https://schema.org",
-          "@type": "BlogPosting",
-          headline: article.title,
+          "@type": "TechArticle",
+          headline: article.headline ?? article.title,
+          name: article.title,
           description: article.description,
           datePublished: article.date,
           dateModified: article.date,
           mainEntityOfPage: url,
-          author: { "@type": "Organization", name: siteName },
-          publisher: { "@type": "Organization", name: siteName },
+          author: { "@type": "Organization", name: siteName, url: absoluteUrl("/") },
+          publisher: { "@type": "Organization", name: siteName, url: absoluteUrl("/") },
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+            { "@type": "ListItem", position: 2, name: "Blog", item: absoluteUrl("/blog") },
+            { "@type": "ListItem", position: 3, name: article.title, item: url },
+          ],
         }}
       />
       {article.faq ? (
@@ -92,13 +105,14 @@ async function Article({ params }: { params: PageProps<"/blog/[slug]">["params"]
       </nav>
       <header className="space-y-4 border-b border-border pb-8">
         <p className="font-mono text-[11px] text-muted">
+          <span>Last updated </span>
           <time dateTime={article.date}>{formatArticleDate(article.date)}</time>
           <span aria-hidden className="px-2">
             ·
           </span>
           {article.tags.join(" · ")}
         </p>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{article.title}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{article.headline ?? article.title}</h1>
         <p className="text-muted">{article.description}</p>
         <ArticleToc source={article.body} />
       </header>

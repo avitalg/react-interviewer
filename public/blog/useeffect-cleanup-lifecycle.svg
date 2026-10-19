@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="220" viewBox="0 0 960 220" role="img" aria-labelledby="title desc">
+  <title id="title">useEffect cleanup function lifecycle diagram</title>
+  <desc id="desc">Mount runs the effect. A dependency change runs cleanup, then the effect again. Unmount runs cleanup.</desc>
+  <style>
+    .box { fill: #18181b; stroke: #3f3f46; }
+    .label { fill: #e4e4e7; font: 600 14px ui-sans-serif, system-ui, sans-serif; }
+    .sub { fill: #a1a1aa; font: 12px ui-sans-serif, system-ui, sans-serif; }
+    .arrow { stroke: #38bdf8; stroke-width: 2; fill: none; }
+    .cleanup { stroke: #f59e0b; }
+    .dot { fill: #38bdf8; }
+  </style>
+  <rect x="16" y="48" width="120" height="64" rx="10" class="box"/>
+  <text x="76" y="76" text-anchor="middle" class="label">Mount</text>
+  <text x="76" y="96" text-anchor="middle" class="sub">effect runs</text>
+
+  <path d="M136 80 H176" class="arrow"/>
+  <polygon points="176,74 188,80 176,86" fill="#38bdf8"/>
+
+  <rect x="188" y="48" width="128" height="64" rx="10" class="box"/>
+  <text x="252" y="76" text-anchor="middle" class="label">Deps change</text>
+  <text x="252" y="96" text-anchor="middle" class="sub">before next effect</text>
+
+  <path d="M316 80 H356" class="arrow cleanup"/>
+  <polygon points="356,74 368,80 356,86" fill="#f59e0b"/>
+
+  <rect x="368" y="48" width="128" height="64" rx="10" class="box"/>
+  <text x="432" y="76" text-anchor="middle" class="label">Cleanup</text>
+  <text x="432" y="96" text-anchor="middle" class="sub">undo last effect</text>
+
+  <path d="M496 80 H536" class="arrow"/>
+  <polygon points="536,74 548,80 536,86" fill="#38bdf8"/>
+
+  <rect x="548" y="48" width="128" height="64" rx="10" class="box"/>
+  <text x="612" y="76" text-anchor="middle" class="label">Effect</text>
+  <text x="612" y="96" text-anchor="middle" class="sub">runs again</text>
+
+  <path d="M676 80 H716" class="arrow cleanup"/>
+  <polygon points="716,74 728,80 716,86" fill="#f59e0b"/>
+
+  <rect x="728" y="48" width="216" height="64" rx="10" class="box"/>
+  <text x="836" y="76" text-anchor="middle" class="label">Unmount ù cleanup</text>
+  <text x="836" y="96" text-anchor="middle" class="sub">last run of the return function</text>
+
+  <circle cx="76" cy="168" r="5" class="dot"/>
+  <text x="90" y="173" class="sub">Blue arrows: setup. Amber arrows: useEffect cleanup function.</text>
+</svg>
