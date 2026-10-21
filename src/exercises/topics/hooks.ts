@@ -254,6 +254,157 @@ export default function App() {
     ],
   },
   {
+    id: "hooks-event-bus",
+    topic: "hooks",
+    title: "Pub/sub event bus",
+    difficulty: "Medium",
+    solutionExplanation: `\`createBus\` keeps a \`Set\` of listeners per event. \`subscribe\` adds one and returns \`unsubscribe\`. \`emit\` calls a snapshot of the set so a listener can unsubscribe mid-emit. In React, subscribe inside an effect and return that unsubscribe — siblings share the bus, not the message.`,
+    description: `Build a tiny pub/sub bus (\`subscribe\` / \`emit\`) so sibling components can talk without lifting state or using Context.
+
+The starter bus never unsubscribes, and \`App\` still lifts the message into parent state — the pattern this exercise replaces.`,
+    requirements: [
+      { id: "bus", text: "Export `createBus()` returning `{ subscribe, emit }`. `subscribe(event, listener)` registers the listener and returns `unsubscribe`. `emit(event, payload)` calls the current listeners with `payload`." },
+      { id: "unsubscribe", text: "After `unsubscribe()`, that listener must not run again. Other listeners for the same event still run." },
+      { id: "app", text: "`Publisher` and `Inbox` are siblings. **Publish** emits `toast` with `\"Saved\"`. `Inbox` shows the last payload in `data-testid=\"inbox\"` (empty until the first emit). Don't pass the message as a prop." },
+    ],
+    starterCode: `import { useState } from 'react';
+
+export function createBus() {
+  const listeners = [];
+  return {
+    subscribe(event, listener) {
+      listeners.push({ event, listener });
+    },
+    emit(event, payload) {
+      for (const item of listeners) {
+        if (item.event === event) item.listener(payload);
+      }
+    },
+  };
+}
+
+function Publisher({ onPublish }) {
+  return <button onClick={onPublish}>Publish</button>;
+}
+
+function Inbox({ message }) {
+  return <p data-testid="inbox">{message}</p>;
+}
+
+export default function App() {
+  const [message, setMessage] = useState('');
+  return (
+    <div>
+      <Publisher onPublish={() => setMessage('Saved')} />
+      <Inbox message={message} />
+    </div>
+  );
+}
+`,
+    referenceSolution: `import { useEffect, useState } from 'react';
+
+export function createBus() {
+  const listeners = new Map();
+
+  function subscribe(event, listener) {
+    let set = listeners.get(event);
+    if (!set) {
+      set = new Set();
+      listeners.set(event, set);
+    }
+    set.add(listener);
+    return () => set.delete(listener);
+  }
+
+  function emit(event, payload) {
+    const set = listeners.get(event);
+    if (!set) return;
+    for (const listener of [...set]) listener(payload);
+  }
+
+  return { subscribe, emit };
+}
+
+export function useSubscribe(bus, event, listener) {
+  useEffect(() => {
+    const unsubscribe = bus.subscribe(event, listener);
+    return unsubscribe;
+  }, [bus, event, listener]);
+}
+
+function Publisher({ bus }) {
+  return <button onClick={() => bus.emit('toast', 'Saved')}>Publish</button>;
+}
+
+function Inbox({ bus }) {
+  const [message, setMessage] = useState('');
+  useSubscribe(bus, 'toast', setMessage);
+  return <p data-testid="inbox">{message}</p>;
+}
+
+export default function App() {
+  const [bus] = useState(createBus);
+  return (
+    <div>
+      <Publisher bus={bus} />
+      <Inbox bus={bus} />
+    </div>
+  );
+}
+`,
+    checks: [
+      {
+        id: "bus",
+        requirementId: "bus",
+        label: "createBus subscribe and emit deliver the payload",
+        kind: "runtime",
+        async run(t: TestApi) {
+          t.assert(typeof t.exports.createBus === "function", "Export a `createBus` function.");
+          const bus = t.exports.createBus();
+          t.assert(bus && typeof bus.subscribe === "function" && typeof bus.emit === "function", "`createBus()` should return `{ subscribe, emit }`.");
+          const seen: unknown[] = [];
+          const other: unknown[] = [];
+          bus.subscribe("ping", (payload: unknown) => seen.push(payload));
+          bus.subscribe("ping", (payload: unknown) => other.push(payload));
+          bus.emit("ping", 42);
+          t.expect(seen, "First listener payloads").toEqual([42]);
+          t.expect(other, "Second listener payloads").toEqual([42]);
+        },
+      },
+      {
+        id: "unsubscribe",
+        requirementId: "unsubscribe",
+        label: "unsubscribe stops only that listener",
+        kind: "runtime",
+        async run(t: TestApi) {
+          const bus = t.exports.createBus();
+          const seen: unknown[] = [];
+          const other: unknown[] = [];
+          const off = bus.subscribe("ping", (payload: unknown) => seen.push(payload));
+          bus.subscribe("ping", (payload: unknown) => other.push(payload));
+          t.assert(typeof off === "function", "`subscribe` should return an unsubscribe function.");
+          off();
+          bus.emit("ping", "keep");
+          t.expect(seen, "Unsubscribed listener").toEqual([]);
+          t.expect(other, "Remaining listener").toEqual(["keep"]);
+        },
+      },
+      {
+        id: "app",
+        requirementId: "app",
+        label: "Publish emits Saved into the inbox",
+        kind: "runtime",
+        async run(t: TestApi) {
+          await t.render();
+          t.expect(t.screen.getByTestId("inbox").textContent?.trim(), "Inbox before publish").toBe("");
+          await t.click(t.screen.getByRole("button", { name: "Publish" }));
+          t.expect(t.screen.getByTestId("inbox").textContent?.trim(), "Inbox after Publish").toBe("Saved");
+        },
+      },
+      { id: "has-cleanup", requirementId: "unsubscribe", label: "The subscribe effect cleans up", kind: "static", rule: { rule: "effectHasCleanup" } },
+    ],
+  },
+  {
     id: "hooks-use-local-storage",
     topic: "hooks",
     title: "useLocalStorage",

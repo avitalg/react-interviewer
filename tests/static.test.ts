@@ -87,6 +87,27 @@ export default function App({ page }) {
     expect(evaluateRule({ rule: "effectHasCleanup" }, f).passed).toBe(false);
   });
 
+  it("treats bus.subscribe like addEventListener for cleanup", () => {
+    const missing = facts(`import { useEffect } from 'react';
+export default function App({ bus }) {
+  useEffect(() => {
+    bus.subscribe('toast', () => {});
+  }, [bus]);
+  return null;
+}`);
+    expect(evaluateRule({ rule: "effectHasCleanup" }, missing).passed).toBe(false);
+
+    const cleaned = facts(`import { useEffect } from 'react';
+export default function App({ bus }) {
+  useEffect(() => {
+    const unsubscribe = bus.subscribe('toast', () => {});
+    return unsubscribe;
+  }, [bus]);
+  return null;
+}`);
+    expect(evaluateRule({ rule: "effectHasCleanup" }, cleaned).passed).toBe(true);
+  });
+
   it("detects read-only inputs and direct DOM access", () => {
     const f = facts(`export default function App() {
   const focus = () => document.getElementById('name').focus();

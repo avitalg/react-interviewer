@@ -314,7 +314,7 @@ export function analyzeWith(babel: Babel, code: string): AnalysisResult {
           }
         }
         if (callee.type === "MemberExpression" && callee.property.type === "Identifier") {
-          if (callee.property.name === "addEventListener") {
+          if (callee.property.name === "addEventListener" || callee.property.name === "subscribe") {
             const [eventArg, handlerArg] = callPath.node.arguments;
             listeners.push({
               target: src(callee.object),
